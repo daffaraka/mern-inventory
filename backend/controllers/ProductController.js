@@ -44,8 +44,8 @@ const createProduct = asyncHandler(async (req, res) => {
 // @route   GET /api/products
 // @access  Private
 const getProducts = asyncHandler(async (req, res) => {
-    const products = await Product.find({ user: req.user.id }).sort("-createdAt");
-    res.status(200).json(products);
+    const products = await Product.find().sort("-createdAt");
+    res.status(200).json({ products, user: req.user });
 });
 
 // @desc    Get single product

@@ -28,7 +28,7 @@ const StockModal = ({ isOpen, onClose, type = 'IN', onSuccess }) => { // type: '
       const fetchProducts = async () => {
         try {
           const data = await productService.getAll();
-          setProducts(data);
+          setProducts(data.products);
         } catch (error) {
           toast.error('Failed to load products');
         }

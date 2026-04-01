@@ -19,6 +19,7 @@ const Products = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [search, setSearch] = useState("");
+  const [user, setUser] = useState("");
 
   // State untuk menyimpan id produk yang dicentang
   const [selectedIds, setSelectedIds] = useState([]);
@@ -28,7 +29,8 @@ const Products = () => {
       setLoading(true);
       // In a real app, we would pass search params here
       const data = await productService.getAll();
-      setProducts(data); // Assuming backend returns array or { products: [] }
+      setProducts(data.products);
+      setUser(data.user); // Assuming backend returns array or { products: [] }
     } catch (error) {
       console.error(error);
       toast.error("Failed to load products");
@@ -100,13 +102,17 @@ const Products = () => {
           <h1 className="text-2xl font-bold text-gray-900">Products</h1>
           <p className="text-sm text-gray-500">Manage your inventory items</p>
         </div>
-        <Button
-          onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add Product
-        </Button>
+        <div className="flex items-center gap-3">
+         
+          <Button
+            onClick={() => setModalOpen(true)}
+            className={`flex items-center gap-2 `}
+            disabled={user?.role !== "admin"}
+          >
+            <Plus size={20} />
+            Add Product
+          </Button>
+        </div>
       </div>
 
       {/* Filters & Search */}

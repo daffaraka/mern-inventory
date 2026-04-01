@@ -60,6 +60,6 @@ const productSchema = new mongoose.Schema(
 );
 
 // Optional: Composite unique index to ensure name is unique PER user
-productSchema.index({ user: 1, name: 1 }, { unique: true });
+// productSchema.index({ user: 1, name: 1 }, { unique: true });
 
 module.exports = mongoose.model("Product", productSchema);

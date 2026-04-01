@@ -13,6 +13,9 @@ import productService from '../../services/productService';
 // Pilihan kategori yang tersedia
 const CATEGORIES = ['Logistik Material', 'Learning Material'];
 
+
+
+
 // Mapping kategori ke mata uang
 // Logistik Material → IDR, Learning Material → USD
 const CURRENCY_MAP = {

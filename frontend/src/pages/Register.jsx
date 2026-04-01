@@ -44,7 +44,8 @@ const Register = () => {
         data.name,
         data.email,
         data.password,
-        'admin' // ✅ auto-assigned role
+        data.role,
+        // 'admin' // ✅ auto-assigned role
       );
 
       toast.success('Account created successfully!');

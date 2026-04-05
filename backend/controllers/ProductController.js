@@ -130,101 +130,16 @@ const deleteProduct = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "Product deleted and history cleared" });
 });
 
-// @desc    Stock In
-// @route   POST /api/stock/in
-// @access  Private (Admin/Staff)
-const stockIn = asyncHandler(async (req, res) => {
-    const { productId, quantity, reason } = req.body;
-
-    if (!quantity || quantity <= 0) {
-        res.status(400);
-        throw new Error("Invalid quantity");
-    }
-
-    const product = await Product.findOne({ _id: productId, user: req.user.id });
-    if (!product) {
-        res.status(404);
-        throw new Error("Product not found in your inventory");
-    }
-
-    product.quantity += Number(quantity);
-    await product.save();
-
-    await StockHistory.create({
-        user: req.user.id,
-        productId,
-        type: "IN",
-        quantity,
-        reason,
-    });
-
-    res.status(200).json({ message: "Stock In successful", currentQuantity: product.quantity });
-});
-
-// @desc    Stock Out
-// @route   POST /api/stock/out
-// @access  Private (Admin/Staff)
-const stockOut = asyncHandler(async (req, res) => {
-    const { productId, quantity, reason } = req.body;
-
-    if (!quantity || quantity <= 0) {
-        res.status(400);
-        throw new Error("Invalid quantity");
-    }
-
-    const product = await Product.findOne({ _id: productId, user: req.user.id });
-    if (!product) {
-        res.status(404);
-        throw new Error("Product not found in your inventory");
-    }
-
-    if (product.quantity < quantity) {
-        res.status(400);
-        throw new Error("Insufficient stock");
-    }
-
-    product.quantity -= Number(quantity);
-    await product.save();
-
-    await StockHistory.create({
-        user: req.user.id,
-        productId,
-        type: "OUT",
-        quantity,
-        reason,
-    });
-
-    res.status(200).json({ message: "Stock Out successful", currentQuantity: product.quantity });
-});
-
-// @desc    Get Stock History
-// @route   GET /api/stock/history
-// @access  Private
-const getStockHistory = asyncHandler(async (req, res) => {
-    const history = await StockHistory.find({ user: req.user.id }).populate("productId", "name").sort("-createdAt");
-    
-    // Map to ensure frontend gets item.product.name while keeping item.productId for any other use
-    const historyWithProduct = history.map(item => {
-        const historyObj = item.toObject();
-        return {
-            ...historyObj,
-            product: historyObj.productId // This makes item.product.name available
-        };
-    });
-
-    res.status(200).json(historyWithProduct);
-});
-
 // @desc    Get Low Stock Products
 // @route   GET /api/products/low-stock
 // @access  Private
 const getLowStockProducts = asyncHandler(async (req, res) => {
-    // Find products where quantity is low (<= 10) OR less than or equal to custom minStock
+    // Find products where quantity is low (<= 5) OR less than or equal to custom minStock
     const products = await Product.find({
-        user: req.user.id,
+        // user: req.user.id,
         $or: [
             { $expr: { $lte: ["$quantity", "$minStock"] } },
-            { quantity: { $lte: 10 } }
+            { quantity: { $lte: 5 } }
         ]
     }).sort("quantity");
 
@@ -237,8 +152,5 @@ module.exports = {
     getProductById,
     updateProduct,
     deleteProduct,
-    stockIn,
-    stockOut,
-    getStockHistory,
     getLowStockProducts
 };

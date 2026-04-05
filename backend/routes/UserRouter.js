@@ -8,5 +8,5 @@ const { protect } = require("../middlewares/ProtectRouters");
 router.post("/register", register);
 router.post("/login", login);
 router.get("/me", protect, getMe);
-router.get("/users",getAlluser)
+router.get("/users", protect, getAlluser)
 module.exports = router;

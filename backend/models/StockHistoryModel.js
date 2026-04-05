@@ -49,6 +49,15 @@ const stockHistorySchema = new mongoose.Schema(
         rejectNote: {
             type: String,
         },
+        salesOrderNumber: {
+            type: String,
+            required: false,
+            trim: true,
+        },
+        inputBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
     },
     {
         timestamps: true,

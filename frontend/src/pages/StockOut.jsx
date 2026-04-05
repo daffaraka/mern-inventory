@@ -2,9 +2,14 @@ import React, { useState } from 'react';
 import StockModal from '../components/stock/StockModal';
 import StockPages from './StockPages';
 import Button from '../components/common/Button';
-import { ArrowDownCircle, TrendingDown } from 'lucide-react';
+import { TrendingDown } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const StockOut = () => {
+    const { user } = useAuth();
+    const canInput = ['staff', 'admin'].includes(user?.role);
+    const [isOpen, setIsOpen] = useState(false);
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -15,34 +20,51 @@ const StockOut = () => {
                         </span>
                         Stock Out
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">Record outgoing inventory and sales.</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                        {user?.role === 'admin'
+                            ? 'Full access: input, approve, and acknowledge Stock Out requests.'
+                            : canInput
+                            ? 'Submit a new stock removal request.'
+                            : user?.role === 'management'
+                                ? 'Review and approve pending Stock Out requests below.'
+                                : 'Acknowledge approved Stock Out requests below.'}
+                    </p>
                 </div>
-            </div>
-            
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 max-w-2xl">
-                 <h2 className="text-lg font-semibold text-gray-900 mb-4">New Removal</h2>
-                 <p className="text-gray-500 mb-6">Click below to record a stock removal.</p>
-                 <StockWrapper type="OUT" />
+                {canInput && (
+                    <Button onClick={() => setIsOpen(true)} className="bg-red-600 hover:bg-red-700 flex items-center gap-2">
+                        <TrendingDown size={18} /> New Stock Out
+                    </Button>
+                )}
             </div>
 
-             <div className="pt-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Stock Out History</h2>
-                <StockPages type="OUT" />
+            {/* Approval flow info */}
+            <div className="flex items-center gap-3 text-sm text-gray-500 bg-white border border-gray-100 rounded-xl px-5 py-3 shadow-sm w-fit">
+                <FlowStep label="Staff" sub="Input"       active={canInput && user?.role !== 'admin'} adminActive={user?.role === 'admin'} />
+                <Arrow />
+                <FlowStep label="Management" sub="Approve"   active={user?.role === 'management'} adminActive={user?.role === 'admin'} />
+                <Arrow />
+                <FlowStep label="Finance" sub="Acknowledge" active={user?.role === 'finance'} adminActive={user?.role === 'admin'} />
             </div>
+
+            <StockPages type="OUT" />
+
+            <StockModal
+                isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                type="OUT"
+                onSuccess={() => { setIsOpen(false); window.location.reload(); }}
+            />
         </div>
     );
 };
 
-const StockWrapper = ({ type }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    return (
-        <>
-            <Button onClick={() => setIsOpen(true)} className={type === 'IN' ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}>
-                Record Stock {type === 'IN' ? 'Entry' : 'Removal'}
-            </Button>
-            <StockModal isOpen={isOpen} onClose={() => setIsOpen(false)} type={type} onSuccess={() => window.location.reload()} />
-        </>
-    )
-}
+const FlowStep = ({ label, sub, active, adminActive }) => (
+    <div className={`flex flex-col items-center px-3 py-1 rounded-lg ${adminActive ? 'bg-purple-50' : active ? 'bg-brand-50' : ''}`}>
+        <span className={`font-semibold text-xs ${adminActive ? 'text-purple-700' : active ? 'text-brand-700' : 'text-gray-700'}`}>{label}</span>
+        <span className={`text-xs ${adminActive ? 'text-purple-500' : active ? 'text-brand-500' : 'text-gray-400'}`}>{sub}</span>
+    </div>
+);
+
+const Arrow = () => <span className="text-gray-300 font-bold">→</span>;
 
 export default StockOut;

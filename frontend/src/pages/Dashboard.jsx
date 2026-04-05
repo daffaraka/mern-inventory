@@ -5,13 +5,14 @@ import {
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
-  ResponsiveContainer, AreaChart, Area, Cell, PieChart, Pie 
+  ResponsiveContainer, Cell
 } from 'recharts';
 import { toast } from 'react-hot-toast';
 import productService from '../services/productService';
 import stockService from '../services/stockService';
 import reportService from '../services/reportService';
 import { useAuth } from '../context/AuthContext';
+import StockActionModal from '../components/stock/StockActionModal';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -22,45 +23,41 @@ const Dashboard = () => {
     movements: []
   });
   const [loading, setLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState(null);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        const [products, history, summary] = await Promise.all([
-          productService.getAll(),
-          stockService.getHistory(),
-          reportService.getSummary().catch((err) => {
-              console.error("Summary error:", err);
-              return { totalProducts: 0, lowStockCount: 0, totalStoreValue: 0, stockMovement: [] };
-          })
-        ]);
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [products, history, summary] = await Promise.all([
+        productService.getAll(),
+        stockService.getHistory(),
+        reportService.getSummary().catch((err) => {
+            console.error("Summary error:", err);
+            return { totalProducts: 0, lowStockCount: 0, totalStoreValue: 0, stockMovement: [] };
+        })
+      ]);
 
-        const historyList = Array.isArray(history) ? history : [];
-        
-        // Calculate today's activity
-        const today = new Date().toDateString();
-        const dailyActivity = historyList.filter(m => new Date(m.createdAt).toDateString() === today).length;
+      const historyList = Array.isArray(history) ? history : [];
+      const today = new Date().toDateString();
+      const dailyActivity = historyList.filter(m => new Date(m.createdAt).toDateString() === today).length;
 
-        // Use backend summary data
-        setStats({
-          totalProducts: summary?.totalProducts ?? productList.length,
-          totalValue: summary?.totalStoreValue ?? 0,
-          lowStock: summary?.lowStockCount ?? 0,
-          movements: historyList.slice(0, 5),
-          dailyActivity: dailyActivity,
-          stockSummary: summary?.stockMovement || []
-        });
-      } catch (error) {
-        console.error(error);
-        toast.error('Failed to load dashboard data');
-      } finally {
-        setLoading(false);
-      }
-    };
+      setStats({
+        totalProducts: summary?.totalProducts ?? products.products?.length ?? 0,
+        totalValue: summary?.totalStoreValue ?? 0,
+        lowStock: summary?.lowStockCount ?? 0,
+        movements: historyList.slice(0, 5),
+        dailyActivity,
+        stockSummary: summary?.stockMovement || []
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchDashboardData();
-  }, []);
+  useEffect(() => { fetchDashboardData(); }, []);
 
   // Map backend stock movement to chart data
   const chartData = stats.stockSummary?.length > 0 
@@ -151,18 +148,32 @@ const Dashboard = () => {
 
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
           <h3 className="font-bold text-gray-900 mb-6">Recent Movements</h3>
-          <div className="space-y-6">
+          <div className="space-y-4">
             {stats.movements.length > 0 ? stats.movements.map((move, i) => (
               <div key={i} className="flex items-center gap-4">
                 <div className={`p-2 rounded-xl ${move.type === 'IN' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                   {move.type === 'IN' ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-900">{move.product?.name}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{move.product?.name}</p>
                   <p className="text-xs text-gray-500">{new Date(move.createdAt).toLocaleDateString()}</p>
                 </div>
-                <div className={`text-sm font-bold ${move.type === 'IN' ? 'text-green-600' : 'text-red-600'}`}>
-                  {move.type === 'IN' ? '+' : '-'}{move.quantity}
+                <div className="flex flex-col items-end gap-1">
+                  <span className={`text-sm font-bold ${move.type === 'IN' ? 'text-green-600' : 'text-red-600'}`}>
+                    {move.type === 'IN' ? '+' : '-'}{move.quantity}
+                  </span>
+                  {/* Clickable status badge */}
+                  <button
+                    onClick={() => move.status === 'pending' || move.status === 'approved' ? setSelectedItem(move) : null}
+                    className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize transition-all
+                      ${move.status === 'pending'      ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 cursor-pointer ring-1 ring-amber-300' : ''}
+                      ${move.status === 'approved'     ? 'bg-blue-100 text-blue-700 hover:bg-blue-200 cursor-pointer ring-1 ring-blue-300' : ''}
+                      ${move.status === 'acknowledged' ? 'bg-green-100 text-green-700 cursor-default' : ''}
+                      ${move.status === 'rejected'     ? 'bg-red-100 text-red-700 cursor-default' : ''}
+                    `}
+                  >
+                    {move.status}
+                  </button>
                 </div>
               </div>
             )) : (
@@ -174,6 +185,16 @@ const Dashboard = () => {
           </button>
         </div>
       </div>
+
+      {/* Stock Action Modal — triggered from pending badge */}
+      {selectedItem && (
+        <StockActionModal
+          item={selectedItem}
+          userRole={user?.role}
+          onClose={() => setSelectedItem(null)}
+          onSuccess={() => { setSelectedItem(null); fetchDashboardData(); }}
+        />
+      )}
     </div>
   );
 };

@@ -17,16 +17,16 @@ const MotionDiv = motion.div;
 
 const schemaIn = yup.object({
   productId: yup.string().required('Product is required'),
-  quantity:  yup.number().typeError('Must be a number').positive().integer().required('Quantity is required'),
-  reason:    yup.string().required('Reason is required'),
-  inputBy:   yup.string().required('Input by is required'),
+  quantity: yup.number().typeError('Must be a number').positive().integer().required('Quantity is required'),
+  reason: yup.string().required('Reason is required'),
+  inputBy: yup.string().required('Input by is required'),
 }).required();
 
 const schemaOut = yup.object({
-  productId:        yup.string().required('Product is required'),
-  quantity:         yup.number().typeError('Must be a number').positive().integer().required('Quantity is required'),
-  reason:           yup.string().required('Reason is required'),
-  inputBy:          yup.string().required('Input by is required'),
+  productId: yup.string().required('Product is required'),
+  quantity: yup.number().typeError('Must be a number').positive().integer().required('Quantity is required'),
+  reason: yup.string().required('Reason is required'),
+  inputBy: yup.string().required('Input by is required'),
   salesOrderNumber: yup.string().optional(),
 }).required();
 
@@ -103,7 +103,7 @@ const StockModal = ({ isOpen, onClose, type = 'IN', onSuccess }) => {
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md pointer-events-auto max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl pointer-events-auto max-h-[90vh] overflow-y-auto">
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white z-10">
                 <div className="flex items-center gap-3">
@@ -118,6 +118,16 @@ const StockModal = ({ isOpen, onClose, type = 'IN', onSuccess }) => {
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+
+
+                <SelectField label="Category" name="category" error={errors.category} registerFn={register}>
+                  <option value="">-- Choose Product --</option>
+                  {products.map(p => (
+                    <option key={p._id} value={p._id}>
+                      {p.name} (Stock: {p.quantity})
+                    </option>
+                  ))}
+                </SelectField>
 
                 <SelectField label="Product" name="productId" error={errors.productId} registerFn={register}>
                   <option value="">-- Choose Product --</option>

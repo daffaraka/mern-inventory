@@ -9,19 +9,19 @@ import stockService from '../services/stockService';
 import { useAuth } from '../context/AuthContext';
 
 const STATUS_STYLES = {
-  pending:      'bg-amber-100 text-amber-700',
-  approved:     'bg-blue-100 text-blue-700',
+  pending: 'bg-amber-100 text-amber-700',
+  approved: 'bg-blue-100 text-blue-700',
   acknowledged: 'bg-green-100 text-green-700',
-  rejected:     'bg-red-100 text-red-700',
+  rejected: 'bg-red-100 text-red-700',
 };
 
 // Confirmation dialog config per action
 const ACTION_CONFIG = {
-  'approve-in':  { label: 'Approve',     color: 'blue',  icon: CheckCircle, message: 'Approve this Stock In request? Stock will be added to inventory.' },
-  'approve-out': { label: 'Approve',     color: 'blue',  icon: CheckCircle, message: 'Approve this Stock Out request? Stock will be deducted from inventory.' },
-  'ack-in':      { label: 'Acknowledge', color: 'green', icon: Eye,         message: 'Acknowledge this Stock In? This confirms you have reviewed the approval.' },
-  'ack-out':     { label: 'Acknowledge', color: 'green', icon: Eye,         message: 'Acknowledge this Stock Out? This confirms you have reviewed the approval.' },
-  'reject':      { label: 'Reject',      color: 'red',   icon: XCircle,     message: 'Reject this request? This action cannot be undone.' },
+  'approve-in': { label: 'Approve', color: 'blue', icon: CheckCircle, message: 'Approve this Stock In request? Stock will be added to inventory.' },
+  'approve-out': { label: 'Approve', color: 'blue', icon: CheckCircle, message: 'Approve this Stock Out request? Stock will be deducted from inventory.' },
+  'ack-in': { label: 'Acknowledge', color: 'green', icon: Eye, message: 'Acknowledge this Stock In? This confirms you have reviewed the approval.' },
+  'ack-out': { label: 'Acknowledge', color: 'green', icon: Eye, message: 'Acknowledge this Stock Out? This confirms you have reviewed the approval.' },
+  'reject': { label: 'Reject', color: 'red', icon: XCircle, message: 'Reject this request? This action cannot be undone.' },
 };
 
 // ConfirmDialog component
@@ -29,9 +29,9 @@ const ConfirmDialog = ({ open, config, onConfirm, onCancel }) => {
   if (!config) return null;
   const Icon = config.icon;
   const colorMap = {
-    blue:  { bg: 'bg-blue-50',  icon: 'text-blue-600',  btn: 'bg-blue-600 hover:bg-blue-700' },
+    blue: { bg: 'bg-blue-50', icon: 'text-blue-600', btn: 'bg-blue-600 hover:bg-blue-700' },
     green: { bg: 'bg-green-50', icon: 'text-green-600', btn: 'bg-green-600 hover:bg-green-700' },
-    red:   { bg: 'bg-red-50',   icon: 'text-red-600',   btn: 'bg-red-600 hover:bg-red-700' },
+    red: { bg: 'bg-red-50', icon: 'text-red-600', btn: 'bg-red-600 hover:bg-red-700' },
   };
   const c = colorMap[config.color];
 
@@ -106,11 +106,11 @@ const StockPages = ({ type }) => {
     const { action, id } = confirm;
     setConfirm(null);
     try {
-      if (action === 'approve-in')       await stockService.approveStockIn(id);
-      else if (action === 'ack-in')      await stockService.acknowledgeStockIn(id);
+      if (action === 'approve-in') await stockService.approveStockIn(id);
+      else if (action === 'ack-in') await stockService.acknowledgeStockIn(id);
       else if (action === 'approve-out') await stockService.approveStockOut(id);
-      else if (action === 'ack-out')     await stockService.acknowledgeStockOut(id);
-      else if (action === 'reject')      await stockService.reject(id);
+      else if (action === 'ack-out') await stockService.acknowledgeStockOut(id);
+      else if (action === 'reject') await stockService.reject(id);
       toast.success(`${ACTION_CONFIG[action].label} successful`);
       fetchHistory();
     } catch (err) {
@@ -195,6 +195,7 @@ const StockPages = ({ type }) => {
                 {type === 'HISTORY' && <th className="px-6 py-4">Type</th>}
                 <th className="px-6 py-4">Qty</th>
                 <th className="px-6 py-4">Reason</th>
+                {(type === 'IN' || type === 'HISTORY') && <th className="px-6 py-4">Approved By</th>}
                 {(type === 'OUT' || type === 'HISTORY') && <th className="px-6 py-4">Sales Order No.</th>}
                 <th className="px-6 py-4">Submitted By</th>
                 <th className="px-6 py-4">Status</th>
@@ -232,6 +233,12 @@ const StockPages = ({ type }) => {
                     )}
                     <td className="px-6 py-4 font-mono font-medium text-gray-900">{item.quantity}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">{item.reason || '—'}</td>
+                    {(type === 'IN' || type === 'HISTORY') && (
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {item.approvedBy?.name || '—'}
+                      </td>
+                    )}
+                    
                     {(type === 'OUT' || type === 'HISTORY') && (
                       <td className="px-6 py-4 text-sm text-gray-500 font-mono">
                         {item.type === 'OUT' ? (item.salesOrderNumber || '—') : '—'}

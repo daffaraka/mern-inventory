@@ -89,7 +89,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.minStock = minStock !== undefined ? minStock : product.minStock;
     product.description = description || product.description;
     product.supplier = supplier || product.supplier;
-    
+
     // Note: Quantity is usually updated via stock operations, but allowing manual override here implementation choice.
     // For strict inventory, maybe disable direct quantity update? 
     // Allowing it for correction purposes, but logging difference would be ideal.
@@ -97,7 +97,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     if (quantity !== undefined) {
         const diff = Number(quantity) - product.quantity;
         if (diff !== 0) {
-             await StockHistory.create({
+            await StockHistory.create({
                 user: req.user.id,
                 productId: product._id,
                 type: diff > 0 ? "IN" : "OUT",
@@ -121,7 +121,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("Product not found in your inventory");
     }
-    
+
     // Use deleteOne() instead of remove() which is deprecated
     await product.deleteOne();
     // Also remove history for this product

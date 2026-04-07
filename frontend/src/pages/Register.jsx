@@ -30,7 +30,7 @@ const Register = () => {
   const { register: registerAction } = useAuth();
   const navigate = useNavigate();
 
-  const roles = ['admin', 'manajemen','finance']; // ✅ Define roles here if needed, or remove if auto-assigned
+  const roles = ['admin', 'manajemen','finance','staff']; // ✅ Define roles here if needed, or remove if auto-assigned
   const {
     register,
     handleSubmit,
@@ -134,13 +134,14 @@ const Register = () => {
               <select
                 label="Role"
                 error={errors.role}
-                className='w-full rounded-sm border border-gray-300 shadow-md p-3'
+                className='w-full rounded-md border border-gray-300 shadow-md p-3'
                 {...register('role')}
               >
                 <option value="">Select a role</option>
                 <option value="admin">Admin</option>
                 <option value="manajemen">Manajemen</option>
                 <option value="finance">Finance</option>
+                <option value="staff">Staff</option>
               </select>
 
               <Button

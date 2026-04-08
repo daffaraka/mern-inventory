@@ -1,59 +1,42 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { X } from 'lucide-react';
-import { motion, AnimatePresence, m } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
 import Input from '../common/Input';
 import Button from '../common/Button';
 import productService from '../../services/productService';
 
-// Pilihan kategori yang tersedia
-const CATEGORIES = ['Logistik Material', 'Learning Material','Office Asset'];
-
-
-
-
-// Mapping kategori ke mata uang
-// Logistik Material → IDR, Learning Material → USD
-const CURRENCY_MAP = {
-  'Logistik Material': 'IDR',
-  'Learning Material': 'USD',
-  'Office Asset' : '',
-};
+const CATEGORIES = ['Logistik Material', 'Learning Material', 'Office Asset'];
+const CURRENCIES = ['IDR', 'USD'];
 
 const schema = yup.object({
   name: yup.string().required('Product name is required'),
   sku: yup.string().required('SKU is required'),
   category: yup.string().required('Category is required'),
   quantity: yup.number().typeError('Quantity must be a number').min(0, 'Min 0').required('Quantity is required'),
+  currency: yup.string().required('Currency is required'),
   price: yup.number().typeError('Price must be a number').min(0, 'Min 0').required('Price is required'),
   description: yup.string(),
   supplier: yup.string(),
 }).required();
 
 const ProductModal = ({ isOpen, onClose, productToEdit, onSuccess }) => {
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm({
-    resolver: yupResolver(schema)
+  const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: { currency: 'IDR' },
   });
-
-  // Watch nilai category untuk menentukan mata uang secara dinamis
-  const selectedCategory = watch('category');
-
-  // Tentukan simbol mata uang berdasarkan kategori yang dipilih
-  // Jika Logistik Material → IDR, jika Learning Material → USD, default '$'
-  const currencySymbol = CURRENCY_MAP[selectedCategory] === 'IDR' ? 'Rp' : '$';
-  const currencyLabel = CURRENCY_MAP[selectedCategory] || 'USD';
 
   useEffect(() => {
     if (productToEdit) {
-      // Set values for edit mode
       const fields = ['name', 'sku', 'category', 'quantity', 'price', 'description', 'supplier'];
       fields.forEach(field => setValue(field, productToEdit[field]));
+      setValue('currency', productToEdit.currency || 'IDR');
     } else {
-      reset();
+      reset({ currency: 'IDR' });
     }
   }, [productToEdit, reset, setValue, isOpen]);
 
@@ -68,7 +51,7 @@ const ProductModal = ({ isOpen, onClose, productToEdit, onSuccess }) => {
       }
       onSuccess();
       onClose();
-      reset();
+      reset({ currency: 'IDR' });
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || 'Operation failed');
@@ -80,9 +63,7 @@ const ProductModal = ({ isOpen, onClose, productToEdit, onSuccess }) => {
       {isOpen && (
         <>
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={onClose}
             className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40"
           />
@@ -106,35 +87,54 @@ const ProductModal = ({ isOpen, onClose, productToEdit, onSuccess }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Input label="Product Name" placeholder="e.g. Wireless Mouse" error={errors.name} {...register('name')} />
                   <Input label="SKU" placeholder="e.g. WM-001" error={errors.sku} {...register('sku')} />
-                  {/* Dropdown category — hanya 2 pilihan: Logistik Material & Learning Material */}
+
+                  {/* Category */}
                   <div className="flex flex-col gap-1">
                     <label className="block text-sm font-medium text-gray-700">Category</label>
                     <select
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-brand-200 focus:border-brand-500 focus:outline-none transition-all ${
-                        errors.category ? 'border-red-400' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-brand-200 focus:border-brand-500 focus:outline-none transition-all ${errors.category ? 'border-red-400' : 'border-gray-300'}`}
                       {...register('category')}
                     >
                       <option value="">Select category...</option>
-                      {CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
+                      {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
                     {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
                   </div>
+
                   <Input label="Supplier" placeholder="e.g. Tech Corp" error={errors.supplier} {...register('supplier')} />
                   <Input label="Quantity" type="number" placeholder="0" error={errors.quantity} {...register('quantity')} />
-                  {/* Label price berubah otomatis sesuai kategori: IDR atau USD */}
-                  <Input label={`Price (${currencyLabel})`} type="number" step="0.01" placeholder="0.00" error={errors.price} {...register('price')} />
+
+                  {/* Price with currency dropdown */}
+                  <div className="flex flex-col gap-1">
+                    <label className="block text-sm font-medium text-gray-700">Price</label>
+                    <div className="flex gap-2">
+                      <select
+                        className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-200 focus:border-brand-500 focus:outline-none transition-all bg-gray-50 ${errors.currency ? 'border-red-400' : 'border-gray-300'}`}
+                        {...register('currency')}
+                      >
+                        {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-brand-200 focus:border-brand-500 focus:outline-none transition-all ${errors.price ? 'border-red-400' : 'border-gray-300'}`}
+                        {...register('price')}
+                      />
+                    </div>
+                    {(errors.price || errors.currency) && (
+                      <p className="text-xs text-red-500">{errors.price?.message || errors.currency?.message}</p>
+                    )}
+                  </div>
                 </div>
-                
+
                 <div className="w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea 
+                  <textarea
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-200 focus:border-brand-500 focus:outline-none transition-all min-h-[100px]"
                     placeholder="Enter product description..."
                     {...register('description')}
-                  ></textarea>
+                  />
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">

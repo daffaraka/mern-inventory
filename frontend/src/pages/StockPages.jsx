@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowUpCircle, ArrowDownCircle, CheckCircle, Eye, XCircle, AlertTriangle } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, CheckCircle, Eye, XCircle, Filter } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import { motion as MotionDiv } from 'framer-motion';
@@ -80,11 +80,20 @@ const ConfirmDialog = ({ open, config, onConfirm, onCancel }) => {
   );
 };
 
+const CATEGORIES = ['Logistik Material', 'Learning Material', 'Office Asset'];
+const STATUSES = ['pending', 'approved', 'acknowledged', 'rejected'];
+
 const StockPages = ({ type }) => {
   const { user } = useAuth();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [confirm, setConfirm] = useState(null); // { action, id }
+  const [confirm, setConfirm] = useState(null);
+
+  // Filters
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
 
   const fetchHistory = useCallback(async () => {
     try {
@@ -101,6 +110,20 @@ const StockPages = ({ type }) => {
   useEffect(() => { fetchHistory(); }, [fetchHistory]);
 
   const requestAction = (action, id) => setConfirm({ action, id });
+
+  // Apply client-side filters
+  const filteredHistory = history.filter((item) => {
+    const itemDate = new Date(item.createdAt);
+    if (dateFrom && itemDate < new Date(dateFrom)) return false;
+    if (dateTo) {
+      const to = new Date(dateTo);
+      to.setHours(23, 59, 59, 999);
+      if (itemDate > to) return false;
+    }
+    if (filterCategory && item.product?.category !== filterCategory) return false;
+    if (filterStatus && item.status !== filterStatus) return false;
+    return true;
+  });
 
   const handleConfirm = async () => {
     const { action, id } = confirm;
@@ -185,6 +208,58 @@ const StockPages = ({ type }) => {
         onCancel={() => setConfirm(null)}
       />
 
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-3 items-end">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-gray-500">From</label>
+          <input
+            type="date"
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-gray-500">To</label>
+          <input
+            type="date"
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-gray-500">Category</label>
+          <select
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none bg-white min-w-[160px]"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-gray-500">Status</label>
+          <select
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none bg-white min-w-[140px]"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="">All Status</option>
+            {STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+          </select>
+        </div>
+        {(dateFrom || dateTo || filterCategory || filterStatus) && (
+          <button
+            onClick={() => { setDateFrom(''); setDateTo(''); setFilterCategory(''); setFilterStatus(''); }}
+            className="flex items-center gap-1 px-3 py-2 text-xs text-gray-500 hover:text-red-500 border border-gray-200 rounded-lg hover:border-red-200 transition-colors"
+          >
+            <Filter size={14} /> Clear
+          </button>
+        )}
+      </div>
+
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -212,12 +287,12 @@ const StockPages = ({ type }) => {
                     </div>
                   </td>
                 </tr>
-              ) : history.length === 0 ? (
+              ) : filteredHistory.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-8 text-center text-gray-500">No records found.</td>
                 </tr>
               ) : (
-                history.map((item) => (
+                filteredHistory.map((item) => (
                   <tr key={item._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                       {new Date(item.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}

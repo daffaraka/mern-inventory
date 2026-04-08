@@ -270,7 +270,7 @@ const StockPages = ({ type }) => {
                 {type === 'HISTORY' && <th className="px-6 py-4">Type</th>}
                 <th className="px-6 py-4">Qty</th>
                 <th className="px-6 py-4">Reason</th>
-                {(type === 'IN' || type === 'HISTORY') && <th className="px-6 py-4">Approved By</th>}
+                <th className="px-6 py-4">Approved By</th>
                 {(type === 'OUT' || type === 'HISTORY') && <th className="px-6 py-4">Sales Order No.</th>}
                 <th className="px-6 py-4">Submitted By</th>
                 <th className="px-6 py-4">Status</th>
@@ -308,11 +308,11 @@ const StockPages = ({ type }) => {
                     )}
                     <td className="px-6 py-4 font-mono font-medium text-gray-900">{item.quantity}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">{item.reason || '—'}</td>
-                    {(type === 'IN' || type === 'HISTORY') && (
+                
                       <td className="px-6 py-4 text-sm text-gray-500">
                         {item.approvedBy?.name || '—'}
                       </td>
-                    )}
+                  
                     
                     {(type === 'OUT' || type === 'HISTORY') && (
                       <td className="px-6 py-4 text-sm text-gray-500 font-mono">

@@ -76,10 +76,10 @@ const StockModal = ({ isOpen, onClose, type = 'IN', onSuccess }) => {
     try {
       if (isStockIn) {
         await stockService.stockIn(data);
-        toast.success('Stock In request submitted');
+        toast.success('Request Stock In request submitted');
       } else {
         await stockService.stockOut(data);
-        toast.success('Stock Out request submitted');
+        toast.success('Request Stock Out request submitted');
       }
       onSuccess();
       onClose();

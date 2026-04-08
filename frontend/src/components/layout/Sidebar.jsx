@@ -22,8 +22,8 @@ const Sidebar = ({ isOpen, onClose }) => {
   const links = [
     { name: 'Dashboard',        path: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'staff', 'finance', 'management'] },
     { name: 'Products',         path: '/products',  icon: Package,         roles: ['admin', 'staff', 'finance', 'management'] },
-    { name: 'Stock In',         path: '/stock-in',  icon: TrendingUp,      roles: ['admin', 'staff', 'finance', 'management'] },
-    { name: 'Stock Out',        path: '/stock-out', icon: TrendingDown,    roles: ['admin', 'staff', 'finance', 'management'] },
+    { name: 'Request Stock In',         path: '/stock-in',  icon: TrendingUp,      roles: ['admin', 'staff', 'finance', 'management'] },
+    { name: 'Request Stock Out',        path: '/stock-out', icon: TrendingDown,    roles: ['admin', 'staff', 'finance', 'management'] },
     { name: 'Low Stock',        path: '/low-stock', icon: AlertTriangle,   roles: ['admin', 'staff', 'finance', 'management'] },
     { name: 'Reports',          path: '/reports',   icon: FileText,        roles: ['admin', 'finance', 'management'] },
     { name: 'User Management',  path: '/users',     icon: Users2,          roles: ['admin'] },

@@ -17,11 +17,11 @@ const { financeOnly, managementOnly } = require("../middlewares/ManajemenPengada
 router.post("/in", protect, stockIn);
 router.post("/out", protect, stockOut);
 
-// Stock In flow: Finance approve → Management acknowledge
+// Request stockIn flow: Finance approve → Management acknowledge
 router.patch("/:id/approve", protect, financeOnly, approveStockIn);
 router.patch("/:id/acknowledge", protect, managementOnly, acknowledgeStockIn);
 
-// Stock Out flow: Management approve → Finance acknowledge
+// Request stockOut flow: Management approve → Finance acknowledge
 router.patch("/:id/approve-out", protect, managementOnly, approveStockOut);
 router.patch("/:id/acknowledge-out", protect, financeOnly, acknowledgeStockOut);
 

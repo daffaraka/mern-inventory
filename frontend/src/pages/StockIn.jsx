@@ -18,21 +18,21 @@ const StockIn = () => {
                         <span className="p-2 bg-green-100 text-green-600 rounded-lg">
                             <TrendingUp size={24} />
                         </span>
-                        Stock In
+                       Request  Stock In
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">
                         {user?.role === 'admin'
-                            ? 'Full access: input, approve, and acknowledge Stock In requests.'
+                            ? 'Full access: input, approve, and acknowledge Request Stock In requests.'
                             : canInput
                             ? 'Submit a new stock entry request.'
                             : user?.role === 'finance'
-                                ? 'Review and approve pending Stock In requests below.'
-                                : 'Acknowledge approved Stock In requests below.'}
+                                ? 'Review and approve pending Request Stock In requests below.'
+                                : 'Acknowledge approved Request Stock In requests below.'}
                     </p>
                 </div>
                 {canInput && (
                     <Button onClick={() => setIsOpen(true)} className="bg-green-600 hover:bg-green-700 flex items-center gap-2">
-                        <TrendingUp size={18} /> New Stock In
+                        <TrendingUp size={18} /> New Request Stock In
                     </Button>
                 )}
             </div>

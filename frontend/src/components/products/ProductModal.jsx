@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, m } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
 import Input from '../common/Input';
@@ -11,7 +11,7 @@ import Button from '../common/Button';
 import productService from '../../services/productService';
 
 // Pilihan kategori yang tersedia
-const CATEGORIES = ['Logistik Material', 'Learning Material'];
+const CATEGORIES = ['Logistik Material', 'Learning Material','Office Asset'];
 
 
 
@@ -21,6 +21,7 @@ const CATEGORIES = ['Logistik Material', 'Learning Material'];
 const CURRENCY_MAP = {
   'Logistik Material': 'IDR',
   'Learning Material': 'USD',
+  'Office Asset' : '',
 };
 
 const schema = yup.object({

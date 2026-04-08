@@ -17,10 +17,10 @@ const STATUS_STYLES = {
 
 // Confirmation dialog config per action
 const ACTION_CONFIG = {
-  'approve-in': { label: 'Approve', color: 'blue', icon: CheckCircle, message: 'Approve this Stock In request? Stock will be added to inventory.' },
-  'approve-out': { label: 'Approve', color: 'blue', icon: CheckCircle, message: 'Approve this Stock Out request? Stock will be deducted from inventory.' },
-  'ack-in': { label: 'Acknowledge', color: 'green', icon: Eye, message: 'Acknowledge this Stock In? This confirms you have reviewed the approval.' },
-  'ack-out': { label: 'Acknowledge', color: 'green', icon: Eye, message: 'Acknowledge this Stock Out? This confirms you have reviewed the approval.' },
+  'approve-in': { label: 'Approve', color: 'blue', icon: CheckCircle, message: 'Approve this Request Stock In request? Stock will be added to inventory.' },
+  'approve-out': { label: 'Approve', color: 'blue', icon: CheckCircle, message: 'Approve this Request Stock Out request? Stock will be deducted from inventory.' },
+  'ack-in': { label: 'Acknowledge', color: 'green', icon: Eye, message: 'Acknowledge this Request Stock In? This confirms you have reviewed the approval.' },
+  'ack-out': { label: 'Acknowledge', color: 'green', icon: Eye, message: 'Acknowledge this Request Stock Out? This confirms you have reviewed the approval.' },
   'reject': { label: 'Reject', color: 'red', icon: XCircle, message: 'Reject this request? This action cannot be undone.' },
 };
 

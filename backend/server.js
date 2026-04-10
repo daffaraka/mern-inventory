@@ -7,6 +7,7 @@ const productRouter = require('./routes/ProductRouter');
 const stockRouter = require('./routes/StockRouter');
 const reportRouter = require('./routes/ReportRouter');
 const exportRouter = require('./routes/ExportRouter');
+const testMailRouter = require('./routes/TestMailRouter');
 
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -49,6 +50,7 @@ app.use('/api/products', productRouter);
 app.use('/api/stock', stockRouter);
 app.use('/api/reports', reportRouter);
 app.use('/api/export', exportRouter);
+app.use('/api/test-mail', testMailRouter);
 
 
 // Global Error Handler

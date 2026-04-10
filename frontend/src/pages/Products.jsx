@@ -59,6 +59,7 @@ const Products = () => {
 
   const selectedProducts = products.filter(p => selectedIds.includes(p._id));
   const totalSelectedStock = selectedProducts.reduce((sum, p) => sum + (p.quantity || 0), 0);
+  const totalSelectedPrice = selectedProducts.reduce((sum, p) => sum + (p.price * p.quantity || 0), 0);
 
   const filteredProducts = products.filter(
     (p) =>
@@ -105,6 +106,7 @@ const Products = () => {
         <div className="bg-brand-50 border border-brand-200 rounded-xl px-6 py-3 flex flex-wrap gap-6 items-center text-sm">
           <span className="font-semibold text-brand-700">{selectedIds.length} product(s) selected</span>
           <span className="text-gray-700">Total Stock: <span className="font-bold">{totalSelectedStock} units</span></span>
+          <span className="text-gray-700">Total Price: <span className="font-bold">{totalSelectedPrice.toFixed(2)}</span></span>
           <button onClick={() => setSelectedIds([])} className="ml-auto text-xs text-gray-400 hover:text-red-500">Clear selection</button>
         </div>
       )}
